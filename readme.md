@@ -1,4 +1,4 @@
-# Cleaner Clock-In System
+# Foyle College Clock-IN-OUT System
 
 A simple clock-in/clock-out web app designed for cleaners with minimal IT experience. The interface is iPad friendly with large buttons for each cleaner. The backend now uses lightweight PHP scripts so it can run on shared hosting providers such as SiteGround.
 
