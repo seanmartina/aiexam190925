@@ -1,5 +1,13 @@
 [
   { "id": "alice", "name": "Alice" },
   { "id": "bob", "name": "Bob" },
-  { "id": "carol", "name": "Carol" }
+  { "id": "carol", "name": "Carol" },
+  { "id": "patricia", "name": "Patricia" },
+  { "id": "richard", "name": "Richard" },
+  { "id": "gareth", "name": "Gareth" },
+  { "id": "sharon", "name": "Sharon" },
+  { "id": "caroline", "name": "Caroline" },
+  { "id": "aron", "name": "Aron" },
+  { "id": "christina", "name": "Christina" },
+  { "id": "oksana", "name": "Oksana" }
 ]
