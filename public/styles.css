@@ -52,6 +52,17 @@ button {
   border-radius: 1rem;
 }
 
+a {
+  color: inherit;
+}
+
+.link-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
 button:focus {
   outline: 3px solid #2563eb;
   outline-offset: 2px;
@@ -137,6 +148,106 @@ button:focus {
 .status-banner.info {
   background: #dbeafe;
   color: #1d4ed8;
+}
+
+.manager-app {
+  max-width: 1024px;
+}
+
+.manager-panel {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 26px rgba(31, 41, 51, 0.08);
+}
+
+.panel-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.panel-header h2 {
+  margin: 0;
+}
+
+.auto-refresh {
+  font-size: 0.9rem;
+  color: #52606d;
+}
+
+.manager-list {
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.manager-card {
+  background: #f8fafc;
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-left: 6px solid #cbd5f5;
+}
+
+.manager-card.clocked-in {
+  border-left-color: #16a34a;
+  background: #ecfdf3;
+}
+
+.manager-card.clocked-out {
+  border-left-color: #9ca3af;
+}
+
+.manager-card.empty {
+  justify-content: center;
+  font-style: italic;
+  color: #52606d;
+}
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.status-dot {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 999px;
+  background: #9ca3af;
+  flex-shrink: 0;
+}
+
+.status-dot.clocked-in {
+  background: #16a34a;
+}
+
+.details {
+  display: flex;
+  flex-direction: column;
+}
+
+.details .name {
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+.details .since {
+  font-size: 0.95rem;
+  color: #52606d;
+}
+
+.status-label {
+  font-weight: 700;
+  color: #1f2933;
 }
 
 .logs {
