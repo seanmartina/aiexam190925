@@ -20,22 +20,20 @@ function showStatus(message, type = 'info') {
   }
 }
 
-async function fetchCleaners() {
-  const response = await fetch('api/cleaners.php', {
-    headers: { 'Accept': 'application/json' },
-  });
-  if (!response.ok) {
-    throw new Error('Unable to fetch cleaners');
-  }
-  return response.json();
-}
+async function fetchJson(endpoint) {
+  const requestUrl = new URL(endpoint, window.location.origin);
+  requestUrl.searchParams.set('_', Date.now().toString());
 
-async function fetchLogs() {
-  const response = await fetch('api/logs.php', {
-    headers: { 'Accept': 'application/json' },
+  const response = await fetch(requestUrl, {
+    headers: {
+      Accept: 'application/json',
+      'Cache-Control': 'no-cache',
+      Pragma: 'no-cache',
+    },
+    cache: 'no-store',
   });
   if (!response.ok) {
-    throw new Error('Unable to fetch logs');
+    throw new Error(`Unable to fetch ${endpoint}`);
   }
   return response.json();
 }
@@ -255,7 +253,10 @@ function renderManagerList() {
 
 async function loadManagerView() {
   try {
-    const [cleanerData, logData] = await Promise.all([fetchCleaners(), fetchLogs()]);
+    const [cleanerData, logData] = await Promise.all([
+      fetchJson('api/cleaners.php'),
+      fetchJson('api/logs.php'),
+    ]);
     cleaners = cleanerData;
     cleanerHistories = buildHistories(logData);
     renderManagerList();
