@@ -1,5 +1,0 @@
-[
-  { "id": "alice", "name": "Alice", "barcode": "123456" },
-  { "id": "bob", "name": "Bob", "barcode": "789012" },
-  { "id": "carol", "name": "Carol", "barcode": "345678" }
-]
