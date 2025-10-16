@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cleaner Clock-In</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <main class="app">
+      <header>
+        <h1>Cleaner Clock-In</h1>
+        <p>Select your name or scan your barcode to clock in or out.</p>
+        <div class="status-banner" id="statusBanner" role="status" aria-live="polite"></div>
+        <div class="actions">
+          <button id="refreshButton" class="secondary">Refresh list</button>
+          <button id="scanToggle" class="secondary">Scan barcode</button>
+        </div>
+      </header>
+      <section id="scanner" class="scanner hidden">
+        <video id="scannerVideo" autoplay muted playsinline></video>
+        <div class="scanner-overlay">Align barcode with the box</div>
+        <button id="stopScan" class="secondary">Stop scanning</button>
+      </section>
+      <section id="cleanerGrid" class="grid" aria-label="Cleaners"></section>
+      <section class="logs" aria-label="Recent activity">
+        <h2>Recent activity</h2>
+        <ul id="logList"></ul>
+      </section>
+    </main>
+
+    <script src="https://unpkg.com/@ericblade/quagga2@1.2.7/dist/quagga.js"></script>
+    <script src="app.js" type="module"></script>
+  </body>
+</html>
