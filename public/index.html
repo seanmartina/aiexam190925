@@ -13,22 +13,41 @@
     />
   </head>
   <body>
+    <div
+      id="loginOverlay"
+      class="login-overlay hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="loginTitle"
+      aria-describedby="loginDescription"
+    >
+      <form id="loginForm" class="login-card">
+        <h2 id="loginTitle">Enter passcode</h2>
+        <p id="loginDescription">Enter the 4-digit code to continue.</p>
+          <input
+            id="loginPasscode"
+            type="password"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            pattern="[0-9]{4}"
+            maxlength="4"
+            required
+            aria-label="4 digit passcode"
+          />
+        <p id="loginError" class="login-error" role="alert"></p>
+        <button type="submit" class="primary">Continue</button>
+      </form>
+    </div>
     <main class="app">
       <header>
         <h1>Cleaner Clock-In</h1>
-        <p>Select your name or scan your barcode to clock in or out.</p>
+        <p>Enter the passcode and then tap your name to clock in or out.</p>
         <div class="status-banner" id="statusBanner" role="status" aria-live="polite"></div>
         <div class="actions">
           <button id="refreshButton" class="secondary">Refresh list</button>
-          <button id="scanToggle" class="secondary">Scan barcode</button>
           <a href="manager.html" class="secondary link-button">Manager view</a>
         </div>
       </header>
-      <section id="scanner" class="scanner hidden">
-        <video id="scannerVideo" autoplay muted playsinline></video>
-        <div class="scanner-overlay">Align barcode with the box</div>
-        <button id="stopScan" class="secondary">Stop scanning</button>
-      </section>
       <section id="cleanerGrid" class="grid" aria-label="Cleaners"></section>
       <section class="logs" aria-label="Recent activity">
         <h2>Recent activity</h2>
@@ -36,7 +55,6 @@
       </section>
     </main>
 
-    <script src="https://unpkg.com/@ericblade/quagga2@1.2.7/dist/quagga.js"></script>
     <script src="app.js" type="module"></script>
   </body>
 </html>

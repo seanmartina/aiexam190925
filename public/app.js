@@ -1,15 +1,12 @@
+import { requirePasscode } from './auth.js';
+
 const cleanerGrid = document.getElementById('cleanerGrid');
 const logList = document.getElementById('logList');
 const statusBanner = document.getElementById('statusBanner');
 const refreshButton = document.getElementById('refreshButton');
-const scanToggle = document.getElementById('scanToggle');
-const scannerSection = document.getElementById('scanner');
-const stopScanButton = document.getElementById('stopScan');
-const scannerVideo = document.getElementById('scannerVideo');
 
 let cleaners = [];
 let logs = [];
-let scanning = false;
 
 async function fetchJson(url) {
   const response = await fetch(url, {
@@ -123,65 +120,8 @@ async function toggleClock(cleanerId) {
   }
 }
 
-function startScanning() {
-  if (scanning) return;
-  scanning = true;
-  scannerSection.classList.remove('hidden');
-  scanToggle.disabled = true;
-
-  const config = {
-    inputStream: {
-      type: 'LiveStream',
-      target: scannerVideo,
-      constraints: {
-        facingMode: 'environment',
-      },
-    },
-    decoder: {
-      readers: ['code_128_reader', 'ean_reader', 'upc_reader'],
-    },
-    locate: true,
-  };
-
-  if (window.Quagga) {
-    window.Quagga.init(config, (err) => {
-      if (err) {
-        console.error(err);
-        showStatus('Unable to start camera. Check permissions.', 'error');
-        stopScanning();
-        return;
-      }
-      window.Quagga.start();
-      window.Quagga.onDetected(onBarcodeDetected);
-    });
-  }
-}
-
-function stopScanning() {
-  if (!scanning) return;
-  scanning = false;
-  scanToggle.disabled = false;
-  scannerSection.classList.add('hidden');
-  if (window.Quagga) {
-    window.Quagga.stop();
-    window.Quagga.offDetected(onBarcodeDetected);
-  }
-}
-
-function onBarcodeDetected(result) {
-  const code = result.codeResult?.code;
-  if (!code) return;
-  const match = cleaners.find((cleaner) => cleaner.barcode === code);
-  if (match) {
-    stopScanning();
-    toggleClock(match.id);
-  } else {
-    showStatus('Barcode not recognised. Please select your name manually.', 'error');
-  }
-}
-
 refreshButton.addEventListener('click', loadData);
-scanToggle.addEventListener('click', startScanning);
-stopScanButton.addEventListener('click', stopScanning);
 
-loadData();
+requirePasscode({
+  onAuthenticated: loadData,
+});

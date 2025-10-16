@@ -12,8 +12,8 @@ ensureDataFiles();
 function resolveDataDirectory(): string
 {
     $candidates = [
-        __DIR__ . '/../data',
         dirname(__DIR__, 2) . '/data',
+        __DIR__ . '/../data',
     ];
 
     foreach ($candidates as $candidate) {

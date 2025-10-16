@@ -1,3 +1,5 @@
+import { requirePasscode } from './auth.js';
+
 const managerList = document.getElementById('managerList');
 const managerStatus = document.getElementById('managerStatus');
 const refreshButton = document.getElementById('managerRefresh');
@@ -127,5 +129,9 @@ refreshButton.addEventListener('click', () => {
   showStatus('List refreshed.', 'success');
 });
 
-loadManagerView();
-startAutoRefresh();
+requirePasscode({
+  onAuthenticated: () => {
+    loadManagerView();
+    startAutoRefresh();
+  },
+});
