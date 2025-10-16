@@ -12,9 +12,23 @@ let logs = [];
 let scanning = false;
 
 async function fetchJson(url) {
-  const response = await fetch(url);
+  const response = await fetch(url, {
+    headers: { 'Accept': 'application/json' },
+  });
   if (!response.ok) throw new Error('Failed to load data');
   return response.json();
+}
+
+function formatTimestamp(isoString) {
+  if (!isoString) return null;
+  const date = new Date(isoString);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toLocaleString(undefined, {
+    hour: 'numeric',
+    minute: '2-digit',
+    month: 'short',
+    day: 'numeric',
+  });
 }
 
 function renderCleaners() {
@@ -23,9 +37,18 @@ function renderCleaners() {
     const button = document.createElement('button');
     button.className = `cleaner ${cleaner.status}`;
     button.dataset.cleanerId = cleaner.id;
+    const formattedLast = formatTimestamp(cleaner.lastTimestamp);
+    const statusLabel =
+      cleaner.status === 'clocked-in'
+        ? formattedLast
+          ? `Clocked in since ${formattedLast}`
+          : 'Clocked in'
+        : formattedLast
+        ? `Last clocked out ${formattedLast}`
+        : 'Clocked out';
     button.innerHTML = `
       <span class="name">${cleaner.name}</span>
-      <span class="status">${cleaner.status === 'clocked-in' ? 'Clocked in' : 'Clocked out'}</span>
+      <span class="status">${statusLabel}</span>
     `;
     button.addEventListener('click', () => toggleClock(cleaner.id));
     cleanerGrid.appendChild(button);
@@ -60,8 +83,8 @@ function showStatus(message, type = 'info') {
 async function loadData() {
   try {
     const [cleanerData, logData] = await Promise.all([
-      fetchJson('/api/cleaners'),
-      fetchJson('/api/logs'),
+      fetchJson('api/cleaners.php'),
+      fetchJson('api/logs.php'),
     ]);
     cleaners = cleanerData;
     logs = logData;
@@ -75,7 +98,7 @@ async function loadData() {
 
 async function toggleClock(cleanerId) {
   try {
-    const response = await fetch('/api/clock', {
+    const response = await fetch('api/clock.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -88,6 +111,8 @@ async function toggleClock(cleanerId) {
     const cleaner = cleaners.find((c) => c.id === cleanerId);
     if (cleaner) {
       cleaner.status = entry.status;
+      cleaner.lastAction = entry.action;
+      cleaner.lastTimestamp = entry.timestamp;
     }
     renderCleaners();
     renderLogs();

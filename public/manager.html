@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cleaner Clock-In – Manager</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <main class="app manager-app">
+      <header>
+        <h1>Clock-In Overview</h1>
+        <p>See who is currently clocked in and the time of their last action.</p>
+        <div class="status-banner" id="managerStatus" role="status" aria-live="polite"></div>
+        <div class="actions">
+          <a href="index.html" class="secondary link-button">Back to clock-in</a>
+          <button id="managerRefresh" class="secondary">Refresh</button>
+        </div>
+      </header>
+
+      <section class="manager-panel" aria-label="Cleaner statuses">
+        <div class="panel-header">
+          <h2>Current status</h2>
+          <span class="auto-refresh">Auto refreshes every minute</span>
+        </div>
+        <ul id="managerList" class="manager-list" aria-live="polite"></ul>
+      </section>
+    </main>
+
+    <script src="manager.js" type="module"></script>
+  </body>
+</html>
