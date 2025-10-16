@@ -9,8 +9,16 @@ let cleaners = [];
 let logs = [];
 
 async function fetchJson(url) {
-  const response = await fetch(url, {
-    headers: { 'Accept': 'application/json' },
+  const requestUrl = new URL(url, window.location.origin);
+  requestUrl.searchParams.set('_', Date.now().toString());
+
+  const response = await fetch(requestUrl, {
+    headers: {
+      Accept: 'application/json',
+      'Cache-Control': 'no-cache',
+      Pragma: 'no-cache',
+    },
+    cache: 'no-store',
   });
   if (!response.ok) throw new Error('Failed to load data');
   return response.json();
@@ -28,24 +36,45 @@ function formatTimestamp(isoString) {
   });
 }
 
+function buildSinceText(cleaner) {
+  const formattedTimestamp = formatTimestamp(cleaner.lastTimestamp);
+
+  if (cleaner.status === 'clocked-in') {
+    return formattedTimestamp ? `Clocked in since ${formattedTimestamp}` : 'Clocked in';
+  }
+
+  if (formattedTimestamp) {
+    const actionLabel = cleaner.lastAction === 'clock-in' ? 'Clocked in' : 'Clocked out';
+    return `${actionLabel} at ${formattedTimestamp}`;
+  }
+
+  return 'No activity yet';
+}
+
 function renderCleaners() {
   cleanerGrid.innerHTML = '';
   cleaners.forEach((cleaner) => {
     const button = document.createElement('button');
-    button.className = `cleaner ${cleaner.status}`;
+    button.type = 'button';
+    button.className = `cleaner-card ${cleaner.status}`;
     button.dataset.cleanerId = cleaner.id;
-    const formattedLast = formatTimestamp(cleaner.lastTimestamp);
-    const statusLabel =
-      cleaner.status === 'clocked-in'
-        ? formattedLast
-          ? `Clocked in since ${formattedLast}`
-          : 'Clocked in'
-        : formattedLast
-        ? `Last clocked out ${formattedLast}`
-        : 'Clocked out';
+    const statusLabel = cleaner.status === 'clocked-in' ? 'Clocked in' : 'Clocked out';
+    const sinceText = buildSinceText(cleaner);
+
+    button.setAttribute('aria-pressed', cleaner.status === 'clocked-in' ? 'true' : 'false');
+    button.setAttribute('aria-label', `${cleaner.name}: ${statusLabel}. ${sinceText}.`);
+
     button.innerHTML = `
-      <span class="name">${cleaner.name}</span>
-      <span class="status">${statusLabel}</span>
+      <div class="card-header">
+        <div class="person">
+          <span class="status-dot ${cleaner.status}" aria-hidden="true"></span>
+          <div class="details">
+            <span class="name">${cleaner.name}</span>
+            <span class="since">${sinceText}</span>
+          </div>
+        </div>
+        <span class="status-label">${statusLabel}</span>
+      </div>
     `;
     button.addEventListener('click', () => toggleClock(cleaner.id));
     cleanerGrid.appendChild(button);
