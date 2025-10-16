@@ -1,8 +1,15 @@
 :root {
   font-size: 18px;
   font-family: 'Nunito', sans-serif;
-  color: #1f2933;
-  background-color: #f4f7fb;
+  color: #0f172a;
+  --surface: rgba(255, 255, 255, 0.85);
+  --surface-border: rgba(255, 255, 255, 0.35);
+  --surface-shadow: rgba(15, 23, 42, 0.35);
+  --muted-text: #64748b;
+  --neon-green: #39ff14;
+  --primary-blue: #2563eb;
+  --primary-purple: #7c3aed;
+  --bg-gradient: radial-gradient(circle at top, #334155 0%, #0f172a 60%, #020617 100%);
 }
 
 body,
@@ -15,27 +22,40 @@ section {
 
 body {
   min-height: 100vh;
+  background: var(--bg-gradient);
+  color: #e2e8f0;
+  display: flex;
+  justify-content: center;
+  padding: 2rem 1rem 4rem;
 }
 
 .app {
-  max-width: 960px;
+  width: min(960px, 100%);
   margin: 0 auto;
-  padding: 2rem 1.5rem 3rem;
+  padding: 2.5rem 2.5rem 3rem;
+  background: var(--surface);
+  border-radius: 1.75rem;
+  border: 1px solid var(--surface-border);
+  box-shadow: 0 28px 60px var(--surface-shadow);
+  backdrop-filter: blur(18px);
+  color: #0f172a;
 }
 
 header {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
 }
 
 header h1 {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
+  font-size: 2.75rem;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.02em;
 }
 
 header p {
   font-size: 1.1rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
+  color: var(--muted-text);
 }
 
 .actions {
@@ -50,6 +70,7 @@ button {
   border: none;
   cursor: pointer;
   border-radius: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.25s ease, background 0.3s ease;
 }
 
 a {
@@ -69,22 +90,29 @@ button:focus {
 }
 
 .secondary {
-  background: #e1e7f5;
-  color: #1f2933;
+  background: rgba(148, 163, 184, 0.2);
+  color: #0f172a;
   padding: 0.75rem 1.5rem;
   font-weight: 600;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.1);
 }
 
 .primary {
-  background: #2563eb;
+  background: linear-gradient(135deg, var(--primary-blue), var(--primary-purple));
   color: #ffffff;
   padding: 0.75rem 1.75rem;
   font-weight: 700;
-  box-shadow: 0 10px 24px rgba(37, 99, 235, 0.25);
+  box-shadow: 0 18px 30px rgba(76, 106, 255, 0.35);
 }
 
 .primary:hover {
-  background: #1d4ed8;
+  background: linear-gradient(135deg, #1d4ed8, #5b21b6);
+}
+
+.primary:active,
+.secondary:active {
+  transform: translateY(1px);
 }
 
 .login-overlay {
@@ -99,10 +127,11 @@ button:focus {
 }
 
 .login-card {
-  background: #ffffff;
+  background: rgba(15, 23, 42, 0.85);
+  color: #e2e8f0;
   padding: 2rem;
   border-radius: 1.5rem;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -117,7 +146,7 @@ button:focus {
 
 .login-card p {
   margin: 0;
-  color: #52606d;
+  color: #cbd5f5;
 }
 
 .login-card input {
@@ -136,7 +165,7 @@ button:focus {
 
 .login-error {
   min-height: 1.25rem;
-  color: #991b1b;
+  color: #fca5a5;
   font-weight: 600;
   margin: 0;
 }
@@ -149,21 +178,25 @@ button:focus {
 }
 
 .cleaner {
-  background: white;
-  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 1.75rem 1.5rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: 0.65rem;
   font-size: 1.2rem;
-  box-shadow: 0 12px 30px rgba(31, 41, 51, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 1.5rem;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12);
+  transition: transform 0.25s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .cleaner:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 16px 36px rgba(31, 41, 51, 0.12);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.18);
 }
 
 .cleaner .name {
@@ -173,19 +206,27 @@ button:focus {
 
 .cleaner .status {
   font-size: 1rem;
-  color: #52606d;
+  color: var(--muted-text);
 }
 
 .cleaner.clocked-in {
-  border: 4px solid #16a34a;
+  border: 2px solid rgba(57, 255, 20, 0.7);
+  box-shadow: 0 0 12px rgba(57, 255, 20, 0.5), 0 0 36px rgba(57, 255, 20, 0.35);
+  animation: neonPulse 2.8s ease-in-out infinite;
 }
 
 .cleaner.clocked-in .status {
-  color: #16a34a;
+  color: var(--neon-green);
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.7);
+}
+
+.cleaner.clocked-in .name {
+  color: #0b1120;
+  text-shadow: 0 0 10px rgba(57, 255, 20, 0.35);
 }
 
 .cleaner.clocked-out {
-  border: 4px solid #9ca3af;
+  border: 2px solid rgba(148, 163, 184, 0.5);
 }
 
 .status-banner {
@@ -198,22 +239,28 @@ button:focus {
   padding: 0.5rem 1rem;
   max-width: 28rem;
   text-align: center;
-  font-weight: 600;
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--muted-text);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: 0 18px 30px rgba(15, 23, 42, 0.12);
 }
 
 .status-banner.success {
-  background: #dcfce7;
-  color: #166534;
+  background: rgba(34, 197, 94, 0.18);
+  color: #14532d;
+  border: 1px solid rgba(34, 197, 94, 0.4);
 }
 
 .status-banner.error {
-  background: #fee2e2;
-  color: #991b1b;
+  background: rgba(248, 113, 113, 0.18);
+  color: #7f1d1d;
+  border: 1px solid rgba(248, 113, 113, 0.4);
 }
 
 .status-banner.info {
-  background: #dbeafe;
+  background: rgba(96, 165, 250, 0.18);
   color: #1d4ed8;
+  border: 1px solid rgba(96, 165, 250, 0.4);
 }
 
 .manager-app {
@@ -221,10 +268,10 @@ button:focus {
 }
 
 .manager-panel {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 1rem;
-  box-shadow: 0 10px 26px rgba(31, 41, 51, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+  padding: 1.75rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.18);
 }
 
 .panel-header {
@@ -240,7 +287,7 @@ button:focus {
 
 .auto-refresh {
   font-size: 0.9rem;
-  color: #52606d;
+  color: var(--muted-text);
 }
 
 .manager-list {
@@ -253,19 +300,20 @@ button:focus {
 }
 
 .manager-card {
-  background: #f8fafc;
-  border-radius: 1rem;
-  padding: 1rem 1.25rem;
+  background: rgba(248, 250, 252, 0.95);
+  border-radius: 1.25rem;
+  padding: 1.25rem 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
   border-left: 6px solid #cbd5f5;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
 }
 
 .manager-card.clocked-in {
   border-left-color: #16a34a;
-  background: #ecfdf3;
+  background: rgba(236, 253, 245, 0.95);
 }
 
 .manager-card.clocked-out {
@@ -275,7 +323,7 @@ button:focus {
 .manager-card.empty {
   justify-content: center;
   font-style: italic;
-  color: #52606d;
+  color: var(--muted-text);
 }
 
 .person {
@@ -294,6 +342,7 @@ button:focus {
 
 .status-dot.clocked-in {
   background: #16a34a;
+  box-shadow: 0 0 12px rgba(22, 163, 74, 0.45);
 }
 
 .details {
@@ -308,7 +357,7 @@ button:focus {
 
 .details .since {
   font-size: 0.95rem;
-  color: #52606d;
+  color: var(--muted-text);
 }
 
 .status-label {
@@ -317,10 +366,10 @@ button:focus {
 }
 
 .logs {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 1rem;
-  box-shadow: 0 10px 26px rgba(31, 41, 51, 0.08);
+  background: rgba(255, 255, 255, 0.92);
+  padding: 1.75rem;
+  border-radius: 1.5rem;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.16);
 }
 
 .logs h2 {
@@ -335,8 +384,8 @@ button:focus {
 }
 
 .logs li {
-  padding: 0.75rem 0;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.7);
   font-size: 1rem;
 }
 
@@ -353,11 +402,30 @@ button:focus {
     font-size: 16px;
   }
 
+  body {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .app {
+    padding: 2rem 1.5rem 2.5rem;
+  }
+
   header h1 {
     font-size: 2rem;
   }
 
   .grid {
     grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+}
+
+@keyframes neonPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 12px rgba(57, 255, 20, 0.55), 0 0 38px rgba(57, 255, 20, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 24px rgba(57, 255, 20, 0.75), 0 0 48px rgba(57, 255, 20, 0.45);
   }
 }
