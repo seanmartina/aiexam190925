@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Foyle College Clock-IN-OUT – Admin</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div
+      id="loginOverlay"
+      class="login-overlay hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="loginTitle"
+      aria-describedby="loginDescription"
+    >
+      <form id="loginForm" class="login-card">
+        <h2 id="loginTitle">Admin access</h2>
+        <p id="loginDescription">Enter the 4-digit passcode to manage cleaners and logs.</p>
+          <input
+            id="loginPasscode"
+            type="password"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+            pattern="[0-9]{4}"
+            maxlength="4"
+            required
+            aria-label="4 digit passcode"
+          />
+        <p id="loginError" class="login-error" role="alert"></p>
+        <button type="submit" class="primary">Continue</button>
+      </form>
+    </div>
+    <main class="app admin-app">
+      <header>
+        <h1>Administration</h1>
+        <p>Manage your cleaning team and export attendance logs.</p>
+        <div class="status-banner" id="adminStatus" role="status" aria-live="polite"></div>
+        <div class="actions">
+          <a href="manager.html" class="secondary link-button">Back to overview</a>
+          <a href="index.html" class="secondary link-button">Back to clock-in</a>
+        </div>
+      </header>
+
+      <section class="manager-panel admin-panel" aria-label="Cleaner management">
+        <form id="addCleanerForm" class="admin-form" novalidate>
+          <label for="addCleanerName" class="admin-label">Add a new cleaner</label>
+          <div class="admin-input-group">
+            <input
+              id="addCleanerName"
+              type="text"
+              name="cleanerName"
+              placeholder="Cleaner name"
+              autocomplete="off"
+              required
+            />
+            <button type="submit" class="primary compact">Add cleaner</button>
+          </div>
+        </form>
+
+        <div class="admin-section" aria-live="polite">
+          <h3>Current cleaners</h3>
+          <ul id="adminCleanerList" class="admin-list"></ul>
+        </div>
+
+        <form id="exportLogsForm" class="admin-form export-form">
+          <label for="exportMonth" class="admin-label">Export logs by month</label>
+          <div class="admin-input-group">
+            <input id="exportMonth" type="month" name="exportMonth" required />
+            <button type="submit" class="secondary compact">Download</button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script src="admin.js" type="module"></script>
+  </body>
+</html>

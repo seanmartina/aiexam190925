@@ -71,9 +71,9 @@ function renderCleaners() {
           <div class="details">
             <span class="name">${cleaner.name}</span>
             <span class="since">${sinceText}</span>
+            <span class="status-label">${statusLabel}</span>
           </div>
         </div>
-        <span class="status-label">${statusLabel}</span>
       </div>
     `;
     button.addEventListener('click', () => toggleClock(cleaner.id));
