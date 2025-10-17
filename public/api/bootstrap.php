@@ -123,3 +123,55 @@ function buildLogEntry(string $cleanerId, string $cleanerName, string $action): 
         'timestamp' => $timestamp,
     ];
 }
+
+function pruneOldLogs(array $logs, int $monthsToKeep = 12): array
+{
+    if ($monthsToKeep <= 0) {
+        return array_values($logs);
+    }
+
+    $cutoff = (new DateTimeImmutable('now'))->modify(sprintf('-%d months', $monthsToKeep));
+    if ($cutoff === false) {
+        return array_values($logs);
+    }
+
+    $cutoffTimestamp = $cutoff->getTimestamp();
+    $filtered = [];
+
+    foreach ($logs as $entry) {
+        $timestamp = $entry['timestamp'] ?? null;
+        if (!is_string($timestamp) || $timestamp === '') {
+            continue;
+        }
+
+        try {
+            $entryTime = new DateTimeImmutable($timestamp);
+        } catch (\Exception $exception) {
+            continue;
+        }
+
+        if ($entryTime->getTimestamp() >= $cutoffTimestamp) {
+            $filtered[] = $entry;
+        }
+    }
+
+    return array_values($filtered);
+}
+
+function generateCleanerId(string $name, array $existingIds): string
+{
+    $existing = array_map('strval', $existingIds);
+    $slug = strtolower(trim(preg_replace('/[^a-z0-9]+/i', '-', $name) ?? '', '-'));
+    if ($slug === '') {
+        $slug = 'cleaner';
+    }
+
+    $candidate = $slug;
+    $suffix = 1;
+    while (in_array($candidate, $existing, true)) {
+        $candidate = $slug . '-' . $suffix;
+        $suffix++;
+    }
+
+    return $candidate;
+}

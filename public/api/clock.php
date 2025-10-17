@@ -32,7 +32,7 @@ if ($cleaner === null) {
     respondError('Cleaner not found.', 404);
 }
 
-$logs = readJson(LOGS_FILE);
+$logs = pruneOldLogs(readJson(LOGS_FILE));
 $state = getCleanerState($cleanerId, $logs);
 
 $nextAction = $action !== '' ? $action : ($state['status'] === 'clocked-in' ? 'clock-out' : 'clock-in');
@@ -42,6 +42,7 @@ if (!in_array($nextAction, ['clock-in', 'clock-out'], true)) {
 
 $entry = buildLogEntry($cleanerId, (string) $cleaner['name'], $nextAction);
 $logs[] = $entry;
+$logs = pruneOldLogs($logs);
 writeJson(LOGS_FILE, $logs);
 
 $response = array_merge($entry, [

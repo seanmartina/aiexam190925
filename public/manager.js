@@ -3,13 +3,18 @@ import { requirePasscode } from './auth.js';
 const managerList = document.getElementById('managerList');
 const managerStatus = document.getElementById('managerStatus');
 const refreshButton = document.getElementById('managerRefresh');
-
 let cleaners = [];
 let cleanerHistories = new Map();
+let logs = [];
 let refreshTimer = null;
 const openHistoryPanels = new Set();
+const SHIFT_START_HOUR = 9;
+const LATE_GRACE_MINUTES = 15;
 
 function showStatus(message, type = 'info') {
+  if (!managerStatus) {
+    return;
+  }
   managerStatus.textContent = message;
   managerStatus.className = `status-banner ${type}`;
   if (message && type !== 'info') {
@@ -169,8 +174,9 @@ function renderManagerList() {
     statusText.className = 'status-label';
     statusText.textContent = cleaner.status === 'clocked-in' ? 'Clocked in' : 'Clocked out';
 
+    details.appendChild(statusText);
+
     header.appendChild(person);
-    header.appendChild(statusText);
     item.appendChild(header);
 
     const cardBody = document.createElement('div');
@@ -251,22 +257,116 @@ function renderManagerList() {
   });
 }
 
-async function loadManagerView() {
+function getShiftThresholds(now = new Date()) {
+  const shiftStart = new Date(now);
+  shiftStart.setHours(SHIFT_START_HOUR, 0, 0, 0);
+  const lateThreshold = new Date(shiftStart.getTime() + LATE_GRACE_MINUTES * 60 * 1000);
+  return { shiftStart, lateThreshold };
+}
+
+function evaluateAttendance(cleanerData, logData) {
+  const now = new Date();
+  const { shiftStart, lateThreshold } = getShiftThresholds(now);
+
+  if (now < shiftStart) {
+    return { late: [], absent: [] };
+  }
+
+  const todaysLogs = new Map();
+
+  logData.forEach((entry) => {
+    const cleanerId = entry.cleanerId;
+    if (!cleanerId) {
+      return;
+    }
+    const timestamp = entry.timestamp;
+    if (!timestamp) {
+      return;
+    }
+    const when = new Date(timestamp);
+    if (Number.isNaN(when.getTime())) {
+      return;
+    }
+    if (
+      when.getFullYear() !== now.getFullYear() ||
+      when.getMonth() !== now.getMonth() ||
+      when.getDate() !== now.getDate()
+    ) {
+      return;
+    }
+    if (!todaysLogs.has(cleanerId)) {
+      todaysLogs.set(cleanerId, []);
+    }
+    todaysLogs.get(cleanerId).push(entry);
+  });
+
+  todaysLogs.forEach((entries, cleanerId) => {
+    entries.sort((a, b) => {
+      const first = new Date(a.timestamp).getTime();
+      const second = new Date(b.timestamp).getTime();
+      return first - second;
+    });
+    todaysLogs.set(cleanerId, entries);
+  });
+
+  const late = [];
+  const absent = [];
+
+  cleanerData.forEach((cleaner) => {
+    const entries = todaysLogs.get(cleaner.id) || [];
+    const firstClockIn = entries.find((entry) => entry.action === 'clock-in');
+
+    if (!firstClockIn) {
+      if (now >= lateThreshold) {
+        absent.push(cleaner.name);
+      }
+      return;
+    }
+
+    const clockInTime = new Date(firstClockIn.timestamp);
+    if (clockInTime > lateThreshold) {
+      late.push(cleaner.name);
+    }
+  });
+
+  late.sort((a, b) => a.localeCompare(b));
+  absent.sort((a, b) => a.localeCompare(b));
+
+  return { late, absent };
+}
+
+async function loadManagerView({ suppressStatus = false } = {}) {
   try {
     const [cleanerData, logData] = await Promise.all([
       fetchJson('api/cleaners.php'),
       fetchJson('api/logs.php'),
     ]);
     cleaners = cleanerData;
+    logs = logData;
     cleanerHistories = buildHistories(logData);
     renderManagerList();
-    const now = new Date();
-    const timeString = now.toLocaleTimeString(undefined, {
-      hour: 'numeric',
-      minute: '2-digit',
-      second: '2-digit',
-    });
-    showStatus(`Last updated at ${timeString}`, 'info');
+    const attendance = evaluateAttendance(cleaners, logs);
+    if (!suppressStatus) {
+      if ((attendance.late.length || attendance.absent.length) && managerStatus) {
+        const messages = [];
+        if (attendance.absent.length) {
+          messages.push(`Absent: ${attendance.absent.join(', ')}`);
+        }
+        if (attendance.late.length) {
+          messages.push(`Late arrivals: ${attendance.late.join(', ')}`);
+        }
+        const type = attendance.absent.length ? 'error' : 'warning';
+        showStatus(messages.join(' • '), type);
+      } else {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString(undefined, {
+          hour: 'numeric',
+          minute: '2-digit',
+          second: '2-digit',
+        });
+        showStatus(`Last updated at ${timeString}`, 'info');
+      }
+    }
   } catch (error) {
     console.error(error);
     showStatus('Unable to load cleaner statuses. Try again later.', 'error');
@@ -282,7 +382,6 @@ function startAutoRefresh() {
 
 refreshButton.addEventListener('click', () => {
   loadManagerView();
-  showStatus('List refreshed.', 'success');
 });
 
 requirePasscode({
