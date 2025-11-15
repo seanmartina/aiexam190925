@@ -1,6 +1,3 @@
-const PASSCODE = '1562';
-const STORAGE_KEY = 'clockin:passcode-validated';
-
 function focusInput(input) {
   if (typeof input.focus === 'function') {
     input.focus();
@@ -24,33 +21,93 @@ export function requirePasscode({
     return;
   }
 
-  const unlock = () => {
+  const showOverlay = (message = '') => {
+    overlay.classList.remove('hidden');
+    if (error) {
+      error.textContent = message;
+    }
+    if (input) {
+      input.value = '';
+    }
+    focusInput(input);
+  };
+
+  const hideOverlay = () => {
     overlay.classList.add('hidden');
-    sessionStorage.setItem(STORAGE_KEY, 'true');
+    if (error) {
+      error.textContent = '';
+    }
+  };
+
+  const authenticateAndProceed = () => {
+    hideOverlay();
     onAuthenticated();
   };
 
-  if (sessionStorage.getItem(STORAGE_KEY) === 'true') {
-    unlock();
-    return;
-  }
+  const checkSession = async () => {
+    try {
+      const response = await fetch('api/session.php', {
+        method: 'GET',
+        headers: {
+          Accept: 'application/json',
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache',
+        },
+        cache: 'no-store',
+        credentials: 'same-origin',
+      });
 
-  overlay.classList.remove('hidden');
-  focusInput(input);
+      if (response.ok) {
+        const body = await response.json();
+        if (body.authenticated) {
+          authenticateAndProceed();
+          return;
+        }
+      }
+    } catch (fetchError) {
+      console.error(fetchError);
+    }
 
-  form.addEventListener('submit', (event) => {
+    showOverlay();
+  };
+
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
-    if (input.value.trim() === PASSCODE) {
-      if (error) {
-        error.textContent = '';
+    const passcode = input.value.trim();
+    if (!passcode) {
+      showOverlay('Enter the passcode to continue.');
+      return;
+    }
+
+    try {
+      const response = await fetch('api/login.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+        body: JSON.stringify({ passcode }),
+        credentials: 'same-origin',
+      });
+
+      const body = await response.json().catch(() => ({}));
+
+      if (!response.ok || !body.authenticated) {
+        const message = body.message || 'Incorrect passcode. Please try again.';
+        showOverlay(message);
+        return;
       }
-      unlock();
-    } else {
-      if (error) {
-        error.textContent = 'Incorrect passcode. Please try again.';
-      }
-      input.value = '';
-      focusInput(input);
+
+      authenticateAndProceed();
+    } catch (networkError) {
+      console.error(networkError);
+      showOverlay('Unable to verify the passcode. Check your connection.');
     }
   });
+
+  window.addEventListener('auth:required', () => {
+    showOverlay();
+  });
+
+  checkSession();
 }

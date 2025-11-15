@@ -36,7 +36,12 @@ async function fetchJson(endpoint) {
       Pragma: 'no-cache',
     },
     cache: 'no-store',
+    credentials: 'same-origin',
   });
+  if (response.status === 401) {
+    window.dispatchEvent(new Event('auth:required'));
+    throw new Error(`Unable to fetch ${endpoint}`);
+  }
   if (!response.ok) {
     throw new Error(`Unable to fetch ${endpoint}`);
   }
@@ -369,7 +374,11 @@ async function loadManagerView({ suppressStatus = false } = {}) {
     }
   } catch (error) {
     console.error(error);
-    showStatus('Unable to load cleaner statuses. Try again later.', 'error');
+    if (error instanceof Error && error.message === 'Authentication required') {
+      showStatus('Session expired. Please enter the passcode again.', 'error');
+    } else {
+      showStatus('Unable to load cleaner statuses. Try again later.', 'error');
+    }
   }
 }
 
