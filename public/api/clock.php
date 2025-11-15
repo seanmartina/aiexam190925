@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 require __DIR__ . '/bootstrap.php';
 
+requireAuthentication();
+
 if (strtoupper($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     respondError('Method not allowed.', 405);
 }

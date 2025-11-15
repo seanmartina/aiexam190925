@@ -19,7 +19,12 @@ async function fetchJson(url) {
       Pragma: 'no-cache',
     },
     cache: 'no-store',
+    credentials: 'same-origin',
   });
+  if (response.status === 401) {
+    window.dispatchEvent(new Event('auth:required'));
+    throw new Error('Authentication required');
+  }
   if (!response.ok) throw new Error('Failed to load data');
   return response.json();
 }
@@ -118,7 +123,11 @@ async function loadData() {
     renderLogs();
   } catch (error) {
     console.error(error);
-    showStatus('Unable to load data. Check your connection.', 'error');
+    if (error instanceof Error && error.message === 'Authentication required') {
+      showStatus('Session expired. Please enter the passcode again.', 'error');
+    } else {
+      showStatus('Unable to load data. Check your connection.', 'error');
+    }
   }
 }
 
@@ -130,7 +139,12 @@ async function toggleClock(cleanerId) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ cleanerId }),
+      credentials: 'same-origin',
     });
+    if (response.status === 401) {
+      window.dispatchEvent(new Event('auth:required'));
+      throw new Error('Authentication required');
+    }
     if (!response.ok) throw new Error('Clock action failed');
     const entry = await response.json();
     logs.push(entry);
@@ -145,7 +159,11 @@ async function toggleClock(cleanerId) {
     showStatus(`${entry.cleanerName} ${entry.action === 'clock-in' ? 'clocked in' : 'clocked out'}.`, 'success');
   } catch (error) {
     console.error(error);
-    showStatus('There was a problem saving your time. Please try again.', 'error');
+    if (error instanceof Error && error.message === 'Authentication required') {
+      showStatus('Please re-enter the passcode to continue.', 'error');
+    } else {
+      showStatus('There was a problem saving your time. Please try again.', 'error');
+    }
   }
 }
 

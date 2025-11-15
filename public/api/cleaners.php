@@ -5,6 +5,8 @@ require __DIR__ . '/bootstrap.php';
 
 $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 
+requireAuthentication();
+
 switch ($method) {
     case 'GET':
         handleGetCleaners();

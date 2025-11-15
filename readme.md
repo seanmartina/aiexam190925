@@ -9,6 +9,7 @@ A simple clock-in/clock-out web app designed for cleaners with minimal IT experi
 - Recent activity log for supervisors.
 - Passcode protection (default 1562) before the interface can be used.
 - Data stored locally in JSON files (`data/`).
+- Secure, server-verified passcode so managers can unlock the dashboard from any device.
 
 ## Getting started
 
@@ -19,6 +20,8 @@ A simple clock-in/clock-out web app designed for cleaners with minimal IT experi
    ```
 
 2. Open a browser (e.g. the iPad Safari) and visit `http://localhost:8000`.
+3. Enter the passcode on the login prompt. A successful login creates a secure session cookie so the same device stays
+   unlocked while the browser tab remains open.
 
 ## Managing cleaners
 
@@ -43,4 +46,12 @@ Clock-in/out events are appended to `data/logs.json`. You can copy this file for
 ## Notes
 
 - For a kiosk setup, add the page to the iPad home screen in "web app" mode so it opens full-screen.
-- The default passcode is `1562`. Update `public/auth.js` if you need to change it.
+- The default passcode is `1562`. Update it by editing `data/settings.json` and replacing `passcodeHash` with a new hash.
+  You can generate a hash with PHP:
+
+  ```bash
+  php -r "echo password_hash('YOUR_NEW_PASSCODE', PASSWORD_DEFAULT), PHP_EOL;"
+  ```
+
+  Paste the output into `settings.json` and refresh your browser sessions. Any device that was logged in will need to
+  enter the new passcode.

@@ -25,6 +25,14 @@ function showStatus(message, type = 'info') {
   }
 }
 
+function handleAuthStatus(error) {
+  if (error instanceof Error && error.message === 'Authentication required') {
+    showStatus('Session expired. Please enter the passcode again.', 'error');
+    return true;
+  }
+  return false;
+}
+
 async function fetchJson(endpoint) {
   const requestUrl = new URL(endpoint, window.location.origin);
   requestUrl.searchParams.set('_', Date.now().toString());
@@ -36,7 +44,13 @@ async function fetchJson(endpoint) {
       Pragma: 'no-cache',
     },
     cache: 'no-store',
+    credentials: 'same-origin',
   });
+
+  if (response.status === 401) {
+    window.dispatchEvent(new Event('auth:required'));
+    throw new Error(`Unable to fetch ${endpoint}`);
+  }
 
   if (!response.ok) {
     throw new Error(`Unable to fetch ${endpoint}`);
@@ -98,7 +112,9 @@ async function loadCleaners({ suppressStatus = false } = {}) {
     }
   } catch (error) {
     console.error(error);
-    showStatus('Unable to load cleaners. Try again later.', 'error');
+    if (!handleAuthStatus(error)) {
+      showStatus('Unable to load cleaners. Try again later.', 'error');
+    }
   }
 }
 
@@ -118,7 +134,13 @@ if (addCleanerForm) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ name }),
+        credentials: 'same-origin',
       });
+
+      if (response.status === 401) {
+        window.dispatchEvent(new Event('auth:required'));
+        throw new Error('Authentication required');
+      }
 
       if (!response.ok) {
         const errorBody = await response.json().catch(() => ({}));
@@ -133,7 +155,9 @@ if (addCleanerForm) {
       showStatus(`Added ${name}.`, 'success');
     } catch (error) {
       console.error(error);
-      showStatus(error.message || 'Unable to add cleaner.', 'error');
+      if (!handleAuthStatus(error)) {
+        showStatus(error.message || 'Unable to add cleaner.', 'error');
+      }
     }
   });
 }
@@ -149,7 +173,13 @@ async function deleteCleaner(cleanerId) {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'same-origin',
     });
+
+    if (response.status === 401) {
+      window.dispatchEvent(new Event('auth:required'));
+      throw new Error('Authentication required');
+    }
 
     if (!response.ok) {
       const errorBody = await response.json().catch(() => ({}));
@@ -160,7 +190,9 @@ async function deleteCleaner(cleanerId) {
     showStatus('Cleaner removed.', 'success');
   } catch (error) {
     console.error(error);
-    showStatus(error.message || 'Unable to remove cleaner.', 'error');
+    if (!handleAuthStatus(error)) {
+      showStatus(error.message || 'Unable to remove cleaner.', 'error');
+    }
   }
 }
 
@@ -175,7 +207,13 @@ async function exportLogs(monthValue) {
       Pragma: 'no-cache',
     },
     cache: 'no-store',
+    credentials: 'same-origin',
   });
+
+  if (response.status === 401) {
+    window.dispatchEvent(new Event('auth:required'));
+    throw new Error('Authentication required');
+  }
 
   if (!response.ok) {
     const errorBody = await response.json().catch(() => ({}));
@@ -207,7 +245,9 @@ if (exportLogsForm) {
       showStatus(`Exported logs for ${monthValue}.`, 'success');
     } catch (error) {
       console.error(error);
-      showStatus(error.message || 'Unable to export logs.', 'error');
+      if (!handleAuthStatus(error)) {
+        showStatus(error.message || 'Unable to export logs.', 'error');
+      }
     }
   });
 }

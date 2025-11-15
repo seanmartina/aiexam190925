@@ -3,9 +3,12 @@ declare(strict_types=1);
 
 header('Content-Type: application/json');
 
+startSession();
+
 define('DATA_DIR', resolveDataDirectory());
 define('CLEANERS_FILE', DATA_DIR . '/cleaners.json');
 define('LOGS_FILE', DATA_DIR . '/logs.json');
+define('SETTINGS_FILE', DATA_DIR . '/settings.json');
 
 ensureDataFiles();
 
@@ -30,13 +33,22 @@ function resolveDataDirectory(): string
 
 function ensureDataFiles(): void
 {
-    foreach ([CLEANERS_FILE, LOGS_FILE] as $file) {
+    $files = [
+        CLEANERS_FILE => "[]\n",
+        LOGS_FILE => '[]',
+        SETTINGS_FILE => json_encode([
+            'passcodeHash' => '$2y$12$MMuitVbETOAobal2m8dtIOnRQr4e4WQgEXT83i57ExMRYIiwUsL2i',
+            'updatedAt' => gmdate('c'),
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES),
+    ];
+
+    foreach ($files as $file => $defaultContents) {
         $dir = dirname($file);
         if (!is_dir($dir) && !mkdir($dir, 0775, true) && !is_dir($dir)) {
             throw new RuntimeException('Failed to create data directory: ' . $dir);
         }
         if (!file_exists($file)) {
-            file_put_contents($file, $file === LOGS_FILE ? '[]' : "[]\n", LOCK_EX);
+            file_put_contents($file, $defaultContents, LOCK_EX);
         }
     }
 }
@@ -52,6 +64,52 @@ function readJson(string $filePath): array
     }
     $data = json_decode($contents, true);
     return is_array($data) ? $data : [];
+}
+
+function startSession(): void
+{
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        return;
+    }
+
+    $options = [
+        'cookie_httponly' => true,
+        'cookie_samesite' => 'Lax',
+    ];
+
+    if (!session_start($options)) {
+        throw new RuntimeException('Unable to start session.');
+    }
+}
+
+function getSettings(): array
+{
+    $settings = readJson(SETTINGS_FILE);
+    return is_array($settings) ? $settings : [];
+}
+
+function isAuthenticated(): bool
+{
+    return ($_SESSION['authenticated'] ?? false) === true;
+}
+
+function requireAuthentication(): void
+{
+    if (!isAuthenticated()) {
+        respondError('Authentication required.', 401);
+    }
+}
+
+function verifyPasscode(string $passcode): bool
+{
+    $settings = getSettings();
+    $hash = (string) ($settings['passcodeHash'] ?? '');
+
+    if ($hash === '') {
+        return false;
+    }
+
+    return password_verify($passcode, $hash);
 }
 
 function writeJson(string $filePath, array $data): void
